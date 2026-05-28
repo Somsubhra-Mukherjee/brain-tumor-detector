@@ -5,7 +5,12 @@ from tensorflow import keras
 from PIL import Image
 
 # Load model
-model = keras.models.load_model("brain_tumor_classifier.keras")
+# model = keras.models.load_model("brain_tumor_classifier.keras")
+@st.cache_resource
+def load_model():
+    return keras.models.load_model("brain_tumor_classifier.keras")
+
+model = load_model()
 
 # Class labels
 classes = ['glioma', 'meningioma', 'notumor', 'pituitary']
@@ -14,6 +19,8 @@ classes = ['glioma', 'meningioma', 'notumor', 'pituitary']
 st.title("Brain Tumor MRI Classifier")
 
 st.write("Upload an MRI image to predict the tumor type.")
+
+st.warning("For educational purposes only. Not for medical diagnosis.")
 
 uploaded_file = st.file_uploader(
     "Choose an MRI image",

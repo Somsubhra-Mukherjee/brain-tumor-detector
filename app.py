@@ -4,13 +4,14 @@ import pandas as pd
 from tensorflow import keras
 from PIL import Image
 
-# Load model
-# model = keras.models.load_model("brain_tumor_classifier.keras")
 @st.cache_resource
 def load_model():
     return keras.models.load_model("brain_tumor_classifier.keras")
 
+
+# Load model once per Streamlit process.
 model = load_model()
+
 
 # Class labels
 classes = ['glioma', 'meningioma', 'notumor', 'pituitary']
@@ -43,7 +44,12 @@ if uploaded_file is not None:
     img_array = np.expand_dims(img_array, axis=0)
 
     # Prediction
-    prediction = model.predict(img_array)
+    with st.spinner("Predicting..."):
+        try:
+            prediction = model(img_array, training=False).numpy()
+        except Exception as exc:
+            st.exception(exc)
+            st.stop()
 
     predicted_class = classes[np.argmax(prediction)]
 
@@ -68,6 +74,6 @@ if uploaded_file is not None:
         }
     ).sort_values("Probability (%)", ascending=False)
 
-    st.dataframe(probability_df, use_container_width=True, hide_index=True)
+    st.dataframe(probability_df, width="stretch", hide_index=True)
 
 # streamlit run app.py
